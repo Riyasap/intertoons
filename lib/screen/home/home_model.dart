@@ -4,9 +4,9 @@
 
 import 'dart:convert';
 
-List<HomeModel> homeModelFromJson(String str) => List<HomeModel>.from(json.decode(str).map((x) => HomeModel.fromJson(x)));
+// List<HomeModel> homeModelFromJson(String str) => List<HomeModel>.from(json.decode(str).map((x) => HomeModel.fromJson(x)));
 
-String homeModelToJson(List<HomeModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+// String homeModelToJson(List<HomeModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class HomeModel {
   HomeModel({
@@ -50,7 +50,7 @@ class Data {
   factory Data.fromJson(Map<String, dynamic> json) => Data(
     id: json["id"],
     title: json["title"] == null ? null : json["title"],
-    items: List<Item>.from(json["items"].map((x) => Item.fromJson(x))),
+    items: json["items"] != null ? List<Item>.from(json["items"].map((x) => Item.fromJson(x))) : null,
     type: json["type"] == null ? null : json["type"],
     file: json["file"] == null ? null : json["file"],
   );
@@ -92,7 +92,7 @@ class Item {
     image: json["image"],
     price: json["price"].toDouble(),
     storage: json["storage"],
-    productTag: json["product_tag"],
+    productTag: ProductTag.VAT_INCLUDED,
   );
 
   Map<String, dynamic> toJson() => {

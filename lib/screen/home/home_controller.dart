@@ -51,12 +51,10 @@ class HomeController extends StateNotifier<HomeControllerState>{
 
 
     try {
-      print("nop");
       final response = await _dio.get('homepage');
-      //final test=homeModelFromJson(response.toString());
-      print("tesssssst $response");
-      final tt= json.encode(response);
-      final test = homeModelFromJson(tt);
+      final data= json.decode(response.data);
+      final test = (data as List).map((e) => HomeModel.fromJson(e)).toList();
+
       state = HomeState(RequestStatus.success,response:test);
 
     }

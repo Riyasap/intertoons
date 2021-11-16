@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intertoons/core/constant/custom_colors.dart';
@@ -9,7 +8,6 @@ import 'package:intertoons/screen/home/home_model.dart';
 import 'package:intertoons/screen/home/home_response_model.dart';
 import 'package:intertoons/screen/product_details/product_details_screen.dart';
 
-
 class Home extends ConsumerStatefulWidget {
   const Home({Key? key}) : super(key: key);
 
@@ -18,18 +16,17 @@ class Home extends ConsumerStatefulWidget {
 }
 
 class _HomeState extends ConsumerState<Home> {
-  List<HomeModel> productList=[];
+  List<HomeModel> productList = [];
+  List<HomeModel> bannerList = [];
   //HomeModel? homeModel;
-  bool isLoading = false;
-  bool offer =false;
+  bool isLoading = true;
+  bool offer = false;
 
   @override
   void initState() {
     WidgetsBinding.instance?.addPostFrameCallback((_) {
       ref.read(homeController.notifier).getHome();
-      setState(() {
-
-      });
+      setState(() {});
     });
     super.initState();
     print("running");
@@ -37,139 +34,202 @@ class _HomeState extends ConsumerState<Home> {
 
   @override
   Widget build(BuildContext context) {
-
     ref.listen<HomeControllerState>(homeController, (previous, next) {
       if (next is HomeState) {
         print("Test");
         if (next.requestStatus == RequestStatus.success) {
-          setState(() {
-            print("Test");
-            isLoading=true;
+          next.response?.forEach((element) {
+            if (element.type == 'productlist') {
+              print("product");
+              if (element.data?.items?.length != 0) productList.add(element);
+            } else if (element.type == 'banner') {
+              bannerList.add(element);
+              print("banner");
+            }
           });
-          print("succes1");
-          print(next.response);
-          //homeModel = next.response;
-          //print("tstttt ${homeModel[1].data.title}");
-          isLoading=false;
-          //productList = List.generate(2., (index) => null)
-          //productList = List.generate(productList.length, (index) => next.response![index]);
-          // :List.generate(productList.length, (index) => productList![index]);
-          print("Success");
+          setState(() {
+            isLoading = false;
+          });
         }
 
         print("else");
       }
     });
     return Scaffold(
-      appBar: AppBar(
-        leading: const Icon(Icons.menu),
-        title: const Text("Oman Phone"),
-        centerTitle: true,
-        actions: [
-          Row(
-            children: const [
-              Icon(Icons.notifications),
-              SizedBox(
-                width: 16,
-              )
-            ],
-          )
-        ],
-        bottom: const SearchBar(),
-      ),
-      backgroundColor: Colors.grey,
-       body:
-       isLoading
-      ?CircularProgressIndicator()
-
-
-       :SingleChildScrollView(
-         physics: AlwaysScrollableScrollPhysics(),
-        child:  Column(
-          children: [
-            Container(
-              width: MediaQuery.of(context).size.width,
-              child: Image.network("https://omanphone.smsoman.com/mobile-admin/uploads/image_614ada079781e.jpg",fit: BoxFit.fill,),
-            ),
-            SizedBox(height: 6,),
-            ListView.builder(
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: 2,
-              shrinkWrap: true,
-              itemBuilder: (context,index)
-            {
-                // if(homeResponseModel?.type=="productlist"){
-                  return Container(
-                margin: EdgeInsets.all(6),
-                padding: EdgeInsets.all(14),
-                color: Colors.white,
+        appBar: AppBar(
+          leading: const Icon(Icons.menu),
+          title: const Text("Oman Phone"),
+          centerTitle: true,
+          actions: [
+            Row(
+              children: const [
+                Icon(Icons.notifications),
+                SizedBox(
+                  width: 16,
+                )
+              ],
+            )
+          ],
+          bottom: const SearchBar(),
+        ),
+        backgroundColor: Colors.grey,
+        body: isLoading
+            ? Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
                 child: Column(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(productList[index].data?.title ?? "",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
-                        MaterialButton(onPressed: (){},
-                          color: CustomColors.red,
-                          child: Text("View all",style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),),
-                        )
-                      ],
-                    ),
-                    SizedBox(height: 8,),
-                    GridView.builder(gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(mainAxisSpacing: 16,
-                     // crossAxisSpacing: 13,
-                      crossAxisCount: 2,
-                      childAspectRatio: 3/4,
-                    ),
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: 4,
+                    Container(
+                      height: 220,
+                      child: ListView.builder(
                         shrinkWrap: true,
-                        itemBuilder: (context,index){
-                            return InkWell(
-                              onTap: (){
-                                print(productList[index].type);
-                                //Get.to(()=>ProductDetailScreen());
-                                },
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  children: [
-                                    Image.network("http://omanphone.smsoman.com/pub/media/catalog/product//h/t/htc_desire_320.jpg",fit: BoxFit.fill,),
-                                    Text("Htc",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
-                                  ],
-                                ),
-                                //SizedBox(height: 6,),
-                                !offer
-                                    ?Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                  Text("Htc",style: TextStyle(color: CustomColors.red,fontSize: 20,fontWeight: FontWeight.bold),),
-                                  SizedBox(width: 4,),
-                                  Text("100.22",style: TextStyle(fontSize: 17,color: Colors.grey,
-                                      decoration: TextDecoration.lineThrough,decorationColor: Colors.grey,decorationThickness: 2),),
-                                ],)
-                                    :Text("Htc",style: TextStyle(color: CustomColors.red,fontSize: 20,fontWeight: FontWeight.bold),)
+                        itemCount: bannerList.length,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Container(
+                            //height: 150,
+                            width: MediaQuery.of(context).size.width,
+                            child: Image.network(
+                              // productList.where((element) => element.type=='banner').first.data!.file.toString(),
+                              bannerList[index].data!.file.toString(),
+                              fit: BoxFit.fill,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      height: 6,
+                    ),
+                    ListView.builder(
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: productList.length,
+                      shrinkWrap: true,
+                      itemBuilder: (context, ind) {
+                        // if(homeResponseModel?.type=="productlist"){
 
-                              ],
-                              ),
-                            );
-                        })
+                        return Container(
+                          margin: EdgeInsets.all(6),
+                          padding: EdgeInsets.all(14),
+                          color: Colors.white,
+                          child: (productList[ind].data?.items != 0)
+                              ? Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          productList[ind].data?.title ?? "",
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        MaterialButton(
+                                          onPressed: () {},
+                                          color: CustomColors.red,
+                                          child: Text(
+                                            "View all",
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height: 8,
+                                    ),
+                                    GridView.builder(
+                                        gridDelegate:
+                                            SliverGridDelegateWithFixedCrossAxisCount(
+                                          mainAxisSpacing: 16,
+                                          // crossAxisSpacing: 13,
+                                          crossAxisCount: 2,
+                                          childAspectRatio: 3 / 4,
+                                        ),
+                                        physics: NeverScrollableScrollPhysics(),
+                                        itemCount: productList[ind]
+                                            .data!
+                                            .items!
+                                            .length,
+                                        shrinkWrap: true,
+                                        itemBuilder: (context, index) {
+                                          return InkWell(
+                                            onTap: () {
+                                              print(productList[index].type);
+                                              print(productList.length);
+                                              print(productList[ind]
+                                                  .data!
+                                                  .items!
+                                                  .length);
+                                              //Get.to(()=>ProductDetailScreen());
+                                            },
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Column(
+                                                  children: [
+                                                    Stack(
+                                                      children: [
+                                                        Image.network(
+                                                          "http://omanphone.smsoman.com/pub/media/catalog/product/" +
+                                                              productList[ind]
+                                                                  .data!
+                                                                  .items![index]
+                                                                  .image
+                                                                  .toString(),
+                                                          fit: BoxFit.fill,
+                                                        ),
+
+                                                      ],
+                                                    ),
+                                                    Text(
+                                                      "${productList[ind].data?.items?[index].name}",
+                                                      maxLines: 1,
+                                                      style: TextStyle(
+                                                          fontSize: 18,
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                    ),
+                                                  ],
+                                                ),
+                                                //SizedBox(height: 6,),
+                                                Text(
+                                                  "OMR " +
+                                                      productList[ind]
+                                                          .data!
+                                                          .items![index]
+                                                          .price
+                                                          .toString(),
+                                                  style: TextStyle(
+                                                      color: CustomColors.red,
+                                                      fontSize: 20,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                )
+                                              ],
+                                            ),
+                                          );
+                                        })
+                                  ],
+                                )
+                              : SizedBox(
+                                  height: 1,
+                                ),
+                        );
+                        // else{
+                        //   return Container(child: Text("data"),);
+                        // }
+                      },
+                    ),
                   ],
                 ),
-              );
-                // else{
-                //   return Container(child: Text("data"),);
-                // }
-            },
-            ),
-          ],
-        ),
-      )
-    );
+              ));
   }
 }
-
 
 class SearchBar extends StatefulWidget with PreferredSizeWidget {
   const SearchBar({Key? key}) : super(key: key);
