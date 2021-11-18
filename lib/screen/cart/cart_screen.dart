@@ -96,11 +96,13 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top: 25),
-                          child: Text(cartProducts[index].name.toString(),
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold)),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 25),
+                            child: Text(cartProducts[index].name.toString(),
+                                style: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold)),
+                          ),
                         ),
                         Container(
                             height: 170,
