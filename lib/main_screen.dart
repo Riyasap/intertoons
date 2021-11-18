@@ -25,7 +25,7 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       bottomSelectedIndex = index;
       pageController.animateToPage(index,
-          duration: Duration(milliseconds: 500), curve: Curves.ease);
+          duration: const Duration(milliseconds: 500), curve: Curves.ease);
     });
   }
 
@@ -36,8 +36,7 @@ class _MainScreenState extends State<MainScreen> {
         height: 79,
         child: BottomNavigationBar(
           backgroundColor: Colors.white,
-
-          selectedLabelStyle: TextStyle(color: Colors.grey),
+          selectedLabelStyle: const TextStyle(color: Colors.grey),
           selectedItemColor: CustomColors.red,
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
@@ -83,14 +82,13 @@ class _MainScreenState extends State<MainScreen> {
           onTap: (index) {
             bottomTapped(index);
           },
-
           type: BottomNavigationBarType.fixed,
           elevation: 4,
         ),
       ),
       body: PageView(
           controller: pageController,
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           onPageChanged: (index) {
             pageChanged(index);
           },

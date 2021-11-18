@@ -19,13 +19,13 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
+    return GetMaterialApp(debugShowCheckedModeBanner: false,
       title: 'Oman Phone',
       theme: ThemeData(
-        appBarTheme: AppBarTheme(color: CustomColors.red),
+        appBarTheme: const AppBarTheme(color: CustomColors.red),
         accentColor: CustomColors.red,
       ),
-      home: MainScreen(),
+      home: const MainScreen(),
     );
   }
 }

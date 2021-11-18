@@ -1,91 +1,186 @@
+// ignore_for_file: sized_box_for_whitespace
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intertoons/core/constant/custom_colors.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intertoons/screen/cart/cart_screen.dart';
+import 'package:intertoons/screen/home/home_controller.dart';
+import 'package:intertoons/screen/product_details/product_response_model.dart';
 
-class ProductDetailScreen extends StatefulWidget {
-  const ProductDetailScreen({Key? key}) : super(key: key);
-
+class ProductDetailScreen extends ConsumerStatefulWidget {
+  ProductDetailScreen({Key? key, required this.productResponseModel})
+      : super(key: key);
+  ProductResponseModel productResponseModel;
   @override
-  _ProductDetailScreenState createState() => _ProductDetailScreenState();
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _ProductDetailScreenState();
 }
 
-class _ProductDetailScreenState extends State<ProductDetailScreen> {
-  bool offer=false;
+class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
+  ProductResponseModel? productResponseModel;
+  bool offer = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-    title: const Text("Product Details"),
-    centerTitle: true,
-
-      ),
-          body:  Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
+        actions: [
+          const Icon(Icons.search),
+          const SizedBox(
+            width: 6,
+          ),
+          InkWell(
+            onTap: () => Get.to(() => const CartScreen()),
+            child: Stack(
               children: [
-                Image.network("http://omanphone.smsoman.com/pub/media/catalog/product//h/t/htc_desire_320.jpg",fit: BoxFit.fill,),
-                Positioned(child: Icon(Icons.category_outlined,size: 30,),
-                right: 25,
-                  top: 25,
-                )
+                const Center(child: Icon(Icons.shopping_cart)),
+                if (cartProducts.length != 0)
+                  Positioned(
+                      right: 0,
+                      top: 28,
+                      child: CircleAvatar(
+                        radius: 8,
+                        backgroundColor: Colors.green,
+                        child:
+                            Center(child: Text(cartProducts.length.toString())),
+                      ))
               ],
             ),
-            Container(padding: const EdgeInsets.only(left: 16,right: 16,top: 8,bottom: 16),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+          const SizedBox(
+            width: 20,
+          )
+        ],
+        title: const Text("Product Details"),
+        centerTitle: true,
+      ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Stack(
                 children: [
-                  Text("Htc",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
-                  SizedBox(height: 10),
                   Container(
-                    decoration: BoxDecoration(color: Colors.orange,borderRadius: BorderRadius.circular(16)),
-                    padding: EdgeInsets.symmetric(horizontal: 8,vertical: 2),
-                    
-                    child: Row(mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.star,color: Colors.white,size: 16,),
-                        Text("3.4",style:TextStyle(color:Colors.white,fontSize: 16,fontWeight: FontWeight.bold) ,),
-                      ],
-                    ),
+                    height: 400,
+                    child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: productResponseModel?.image?.length ?? 1,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Container(
+                              height: 300,
+                              width: MediaQuery.of(context).size.width,
+                              child: Image.network(
+                                widget.productResponseModel.image![index],
+                                fit: BoxFit.fill,
+                              ));
+                        }),
                   ),
-                  SizedBox(height: 10),
-                  !offer
-                      ?Row(
-                   //mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("Htc",style: TextStyle(color: CustomColors.red,fontSize: 20,fontWeight: FontWeight.bold),),
-                      SizedBox(width:14,),
-                      Text("100.22",style: TextStyle(fontSize: 17,color: Colors.grey,
-                          decoration: TextDecoration.lineThrough,decorationColor: Colors.grey,decorationThickness: 2),),
-                    ],)
-                      :Text("Htc",style: TextStyle(color: CustomColors.red,fontSize: 20,fontWeight: FontWeight.bold),),
-                  SizedBox(height: 20,),
-                  Container(
-                    padding: EdgeInsets.all(16),
-                    color: Colors.grey,
-                    width: MediaQuery.of(context).size.width,
-                    child: Text("SASA"),
+                  const Positioned(
+                    child: Icon(
+                      Icons.category_outlined,
+                      size: 30,
+                    ),
+                    right: 25,
+                    top: 25,
                   )
                 ],
               ),
+              Container(
+                padding: const EdgeInsets.only(
+                    left: 16, right: 16, top: 8, bottom: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.productResponseModel.name.toString(),
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      decoration: BoxDecoration(
+                          color: Colors.orange,
+                          borderRadius: BorderRadius.circular(16)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 2),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(
+                            Icons.star,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                          Text(
+                            "3.4",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      widget.productResponseModel.price.toString(),
+                      style: const TextStyle(
+                          color: CustomColors.red,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      color: Colors.grey,
+                      width: MediaQuery.of(context).size.width,
+                      child: Row(
+                        children: const [
+                          Text("color"),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          MaterialButton(
+            onPressed: () {
+              bool isCarted = false;
+              if (cartProducts.any(
+                  (element) => element.id == widget.productResponseModel.id)) {
+                isCarted = true;
+              }
+              if (isCarted) {
+                int count = widget.productResponseModel.count?.toInt() ?? 0;
+                count++;
+                widget.productResponseModel.count = count;
+              } else {
+                widget.productResponseModel.count = 1;
+                ref.read(productCartProvider).add(
+                      widget.productResponseModel,
+                    );
+              }
+              setState(() {});
+            },
+            minWidth: MediaQuery.of(context).size.width,
+            color: CustomColors.red,
+            height: 56,
+            child: const Text(
+              "Add to Cart",
+              style: TextStyle(fontSize: 20),
             ),
-          ],
-        ),
-        //SizedBox(height: 6,),
-        !offer
-            ?Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text("Htc",style: TextStyle(color: CustomColors.red,fontSize: 20,fontWeight: FontWeight.bold),),
-            SizedBox(width: 4,),
-            Text("100.22",style: TextStyle(fontSize: 17,color: Colors.grey,
-                decoration: TextDecoration.lineThrough,decorationColor: Colors.grey,decorationThickness: 2),),
-          ],)
-            :Text("Htc",style: TextStyle(color: CustomColors.red,fontSize: 20,fontWeight: FontWeight.bold),)
-
-      ],
-    ),
+          )
+          //SizedBox(height: 6,),
+        ],
+      ),
     );
   }
 }

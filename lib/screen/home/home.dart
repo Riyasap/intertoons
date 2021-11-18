@@ -5,8 +5,8 @@ import 'package:intertoons/screen/home/home_controller.dart';
 import 'package:get/get.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intertoons/screen/home/home_model.dart';
-import 'package:intertoons/screen/home/home_response_model.dart';
 import 'package:intertoons/screen/product_details/product_details_screen.dart';
+import 'package:intertoons/screen/product_details/product_response_model.dart';
 
 class Home extends ConsumerStatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -18,15 +18,14 @@ class Home extends ConsumerStatefulWidget {
 class _HomeState extends ConsumerState<Home> {
   List<HomeModel> productList = [];
   List<HomeModel> bannerList = [];
-  //HomeModel? homeModel;
   bool isLoading = true;
   bool offer = false;
+  ProductResponseModel? productResponseModel;
 
   @override
   void initState() {
     WidgetsBinding.instance?.addPostFrameCallback((_) {
       ref.read(homeController.notifier).getHome();
-      setState(() {});
     });
     super.initState();
     print("running");
@@ -35,25 +34,34 @@ class _HomeState extends ConsumerState<Home> {
   @override
   Widget build(BuildContext context) {
     ref.listen<HomeControllerState>(homeController, (previous, next) {
-      if (next is HomeState) {
-        print("Test");
-        if (next.requestStatus == RequestStatus.success) {
-          next.response?.forEach((element) {
-            if (element.type == 'productlist') {
-              print("product");
-              if (element.data?.items?.length != 0) productList.add(element);
-            } else if (element.type == 'banner') {
-              bannerList.add(element);
-              print("banner");
-            }
-          });
+      switch(next.requestStatus){
+        case RequestStatus.requesting :{
           setState(() {
-            isLoading = false;
+            isLoading = true;
           });
+        }break;
+        case RequestStatus.success : {
+          if (next is HomeState) {
+              next.response?.forEach((element) {
+                if (element.type == 'productlist') {
+                  if (element.data?.items?.length != 0) productList.add(element);
+                } else if (element.type == 'banner') {
+                  bannerList.add(element);
+                }
+              });
+              setState(() {
+                isLoading = false;
+              });
+          }
+          if(next is ProductState){
+            productResponseModel =next.response;
+            Get.to(()=>ProductDetailScreen(productResponseModel: productResponseModel!,));
+          }
         }
 
-        print("else");
       }
+      isLoading = false;
+
     });
     return Scaffold(
         appBar: AppBar(
@@ -74,12 +82,12 @@ class _HomeState extends ConsumerState<Home> {
         ),
         backgroundColor: Colors.grey,
         body: isLoading
-            ? Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator())
             : SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
+                physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
                   children: [
-                    Container(
+                    SizedBox(
                       height: 220,
                       child: ListView.builder(
                         shrinkWrap: true,
@@ -98,7 +106,7 @@ class _HomeState extends ConsumerState<Home> {
                         },
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 6,
                     ),
                     ListView.builder(
@@ -109,8 +117,8 @@ class _HomeState extends ConsumerState<Home> {
                         // if(homeResponseModel?.type=="productlist"){
 
                         return Container(
-                          margin: EdgeInsets.all(6),
-                          padding: EdgeInsets.all(14),
+                          margin: const EdgeInsets.all(6),
+                          padding: const EdgeInsets.all(14),
                           color: Colors.white,
                           child: (productList[ind].data?.items != 0)
                               ? Column(
@@ -121,14 +129,14 @@ class _HomeState extends ConsumerState<Home> {
                                       children: [
                                         Text(
                                           productList[ind].data?.title ?? "",
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold),
                                         ),
                                         MaterialButton(
                                           onPressed: () {},
                                           color: CustomColors.red,
-                                          child: Text(
+                                          child: const Text(
                                             "View all",
                                             style: TextStyle(
                                                 color: Colors.white,
@@ -137,18 +145,18 @@ class _HomeState extends ConsumerState<Home> {
                                         )
                                       ],
                                     ),
-                                    SizedBox(
+                                    const SizedBox(
                                       height: 8,
                                     ),
                                     GridView.builder(
                                         gridDelegate:
-                                            SliverGridDelegateWithFixedCrossAxisCount(
+                                            const SliverGridDelegateWithFixedCrossAxisCount(
                                           mainAxisSpacing: 16,
                                           // crossAxisSpacing: 13,
                                           crossAxisCount: 2,
                                           childAspectRatio: 3 / 4,
                                         ),
-                                        physics: NeverScrollableScrollPhysics(),
+                                        physics: const NeverScrollableScrollPhysics(),
                                         itemCount: productList[ind]
                                             .data!
                                             .items!
@@ -157,12 +165,8 @@ class _HomeState extends ConsumerState<Home> {
                                         itemBuilder: (context, index) {
                                           return InkWell(
                                             onTap: () {
-                                              print(productList[index].type);
-                                              print(productList.length);
-                                              print(productList[ind]
-                                                  .data!
-                                                  .items!
-                                                  .length);
+                                              final int productId = int.parse(productList[ind].data?.items?[index].id ?? '1');
+                                              ref.read(homeController.notifier).getProductDetails(productId);
                                               //Get.to(()=>ProductDetailScreen());
                                             },
                                             child: Column(
@@ -189,7 +193,7 @@ class _HomeState extends ConsumerState<Home> {
                                                     Text(
                                                       "${productList[ind].data?.items?[index].name}",
                                                       maxLines: 1,
-                                                      style: TextStyle(
+                                                      style: const TextStyle(
                                                           fontSize: 18,
                                                           fontWeight:
                                                               FontWeight.bold),
@@ -204,7 +208,7 @@ class _HomeState extends ConsumerState<Home> {
                                                           .items![index]
                                                           .price
                                                           .toString(),
-                                                  style: TextStyle(
+                                                  style: const TextStyle(
                                                       color: CustomColors.red,
                                                       fontSize: 20,
                                                       fontWeight:
